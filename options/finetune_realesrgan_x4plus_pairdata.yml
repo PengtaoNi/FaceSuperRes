@@ -17,8 +17,8 @@ datasets:
   train:
     name: DIV2K
     type: RealESRGANPairedDataset
-    dataroot_gt: dataset/celeba
-    dataroot_lq: dataset/celeba
+    dataroot_gt: dataset/celeba/celeba_aligned_HR
+    dataroot_lq: dataset/celeba/celeba_aligned_LR
     meta_info: dataset/celeba/celeba_aligned_pair.txt
     io_backend:
       type: disk
