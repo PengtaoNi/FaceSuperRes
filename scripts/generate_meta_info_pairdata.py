@@ -27,13 +27,13 @@ if __name__ == '__main__':
     parser.add_argument(
         '--input',
         nargs='+',
-        default=['data/celeba/celeba_aligned_HR', 'data/celeba/celeba_aligned_HR'],
+        default=['dataset/celeba/celeba_aligned_HR', 'dataset/celeba/celeba_aligned_HR'],
         help='Input folder, should be [gt_folder, lq_folder]')
     parser.add_argument('--root', nargs='+', default=[None, None], help='Folder root')
     parser.add_argument(
         '--meta_info',
         type=str,
-        default='data/celeba/celeba_aligned_pair.txt',
+        default='dataset/celeba/celeba_aligned_pair.txt',
         help='txt path for meta info')
     args = parser.parse_args()
 

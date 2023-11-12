@@ -23,12 +23,12 @@ if __name__ == '__main__':
     parser.add_argument(
         '--input',
         nargs='+',
-        default='data/celeba/celeba_aligned_HR',
+        default='dataset/celeba/celeba_aligned_HR',
         help='Input folder')
     parser.add_argument(
         '--output',
         nargs='+',
-        default='data/celeba/celeba_aligned_LR',
+        default='dataset/celeba/celeba_aligned_LR',
         help='Output folder')
     args = parser.parse_args()
     
