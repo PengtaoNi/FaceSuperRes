@@ -27,7 +27,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--input',
         nargs='+',
-        default=['dataset/celeba/celeba_aligned_HR', 'dataset/celeba/celeba_aligned_HR'],
+        default=['dataset/celeba/celeba_aligned_HR', 'dataset/celeba/celeba_aligned_LR'],
         help='Input folder, should be [gt_folder, lq_folder]')
     parser.add_argument('--root', nargs='+', default=[None, None], help='Folder root')
     parser.add_argument(
