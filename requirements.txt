@@ -1,4 +1,5 @@
 argparse
+basicsr>=1.4.2
 numpy
 opencv-python
 Pillow
