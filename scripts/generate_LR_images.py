@@ -12,7 +12,8 @@ def main(args):
         #           Compression (JPEG)
 
         img = Image.open(os.path.join(args.input, img_path))
-        hr = img.crop(0, 0, img.size[0]//4*4, img.size[1]//4*4)
+        hr = img.crop((0, 0, img.size[0]//4*4, img.size[1]//4*4))
+        hr = hr.resize((hr.size[0]*4, hr.size[1]*4), Image.BICUBIC)
         lr = hr.resize((hr.size[0]//4, hr.size[1]//4), Image.BICUBIC)
         hr.save(os.path.join(args.input, img_path))
         lr.save(os.path.join(args.output, img_path))
