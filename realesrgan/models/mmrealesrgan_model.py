@@ -3,7 +3,7 @@ import random
 import torch
 from realesrgan.models.realesrgan_model import RealESRGANModel
 from basicsr.archs import build_network
-from basicsr.losses import build_loss
+from realesrgan.losses import build_loss
 from basicsr.utils.registry import MODEL_REGISTRY
 from basicsr.utils import get_root_logger
 from collections import OrderedDict
