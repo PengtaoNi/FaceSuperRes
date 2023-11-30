@@ -1,6 +1,6 @@
 # general settings
 name: finetune_RealESRGANx4plus_400k_pairdata
-model_type: RealESRGANModel
+model_type: mmRealESRGANModel
 scale: 4
 num_gpu: auto
 manual_seed: 0
@@ -16,9 +16,10 @@ high_order_degradation: False # do not use the high-order degradation generation
 datasets:
   train:
     name: CelebA
-    type: RealESRGANPairedDataset
+    type: ImageTextDataset
     dataroot_gt: dataset/celeba
     dataroot_lq: dataset/celeba
+    dataroot_text: dataset/celeba/celeba_aligned_text.txt
     meta_info: dataset/celeba/celeba_aligned_pair.txt
     io_backend:
       type: disk
@@ -118,6 +119,10 @@ train:
     gan_type: vanilla
     real_label_val: 1.0
     fake_label_val: 0.0
+    loss_weight: !!float 1e-1
+  # clip loss
+  clip_opt:
+    type: ClipLoss
     loss_weight: !!float 1e-1
 
   net_d_iters: 1
