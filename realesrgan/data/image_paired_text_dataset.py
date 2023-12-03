@@ -30,7 +30,7 @@ class ImagePairedTextDataset(data.Dataset):
     """
 
     def __init__(self, opt):
-        super(ImageTextDataset, self).__init__()
+        super(ImagePairedTextDataset, self).__init__()
         self.opt = opt
         self.file_client = None
         self.io_backend_opt = opt['io_backend']

@@ -89,42 +89,42 @@ class mmRealESRGANModel(RealESRGANModel):
         self.setup_optimizers()
         self.setup_schedulers()
 
-    @torch.no_grad()
-    def _dequeue_and_enqueue(self):
-        """It is the training pair pool for increasing the diversity in a batch.
+    # @torch.no_grad()
+    # def _dequeue_and_enqueue(self):
+    #     """It is the training pair pool for increasing the diversity in a batch.
 
-        Batch processing limits the diversity of synthetic degradations in a batch. For example, samples in a
-        batch could not have different resize scaling factors. Therefore, we employ this training pair pool
-        to increase the degradation diversity in a batch.
-        """
-        # initialize
-        b, c, h, w = self.lq.size()
-        if not hasattr(self, 'queue_lr'):
-            assert self.queue_size % b == 0, f'queue size {self.queue_size} should be divisible by batch size {b}'
-            self.queue_lr = torch.zeros(self.queue_size, c, h, w).cuda()
-            _, c, h, w = self.gt.size()
-            self.queue_gt = torch.zeros(self.queue_size, c, h, w).cuda()
-            self.queue_ptr = 0
-        if self.queue_ptr == self.queue_size:  # the pool is full
-            # do dequeue and enqueue
-            # shuffle
-            idx = torch.randperm(self.queue_size)
-            self.queue_lr = self.queue_lr[idx]
-            self.queue_gt = self.queue_gt[idx]
-            # get first b samples
-            lq_dequeue = self.queue_lr[0:b, :, :, :].clone()
-            gt_dequeue = self.queue_gt[0:b, :, :, :].clone()
-            # update the queue
-            self.queue_lr[0:b, :, :, :] = self.lq.clone()
-            self.queue_gt[0:b, :, :, :] = self.gt.clone()
+    #     Batch processing limits the diversity of synthetic degradations in a batch. For example, samples in a
+    #     batch could not have different resize scaling factors. Therefore, we employ this training pair pool
+    #     to increase the degradation diversity in a batch.
+    #     """
+    #     # initialize
+    #     b, c, h, w = self.lq.size()
+    #     if not hasattr(self, 'queue_lr'):
+    #         assert self.queue_size % b == 0, f'queue size {self.queue_size} should be divisible by batch size {b}'
+    #         self.queue_lr = torch.zeros(self.queue_size, c, h, w).cuda()
+    #         _, c, h, w = self.gt.size()
+    #         self.queue_gt = torch.zeros(self.queue_size, c, h, w).cuda()
+    #         self.queue_ptr = 0
+    #     if self.queue_ptr == self.queue_size:  # the pool is full
+    #         # do dequeue and enqueue
+    #         # shuffle
+    #         idx = torch.randperm(self.queue_size)
+    #         self.queue_lr = self.queue_lr[idx]
+    #         self.queue_gt = self.queue_gt[idx]
+    #         # get first b samples
+    #         lq_dequeue = self.queue_lr[0:b, :, :, :].clone()
+    #         gt_dequeue = self.queue_gt[0:b, :, :, :].clone()
+    #         # update the queue
+    #         self.queue_lr[0:b, :, :, :] = self.lq.clone()
+    #         self.queue_gt[0:b, :, :, :] = self.gt.clone()
 
-            self.lq = lq_dequeue
-            self.gt = gt_dequeue
-        else:
-            # only do enqueue
-            self.queue_lr[self.queue_ptr:self.queue_ptr + b, :, :, :] = self.lq.clone()
-            self.queue_gt[self.queue_ptr:self.queue_ptr + b, :, :, :] = self.gt.clone()
-            self.queue_ptr = self.queue_ptr + b
+    #         self.lq = lq_dequeue
+    #         self.gt = gt_dequeue
+    #     else:
+    #         # only do enqueue
+    #         self.queue_lr[self.queue_ptr:self.queue_ptr + b, :, :, :] = self.lq.clone()
+    #         self.queue_gt[self.queue_ptr:self.queue_ptr + b, :, :, :] = self.gt.clone()
+    #         self.queue_ptr = self.queue_ptr + b
 
     @torch.no_grad()
     def feed_data(self, data):
@@ -235,10 +235,12 @@ class mmRealESRGANModel(RealESRGANModel):
                                                                  self.opt['scale'])
 
             # training pair pool
-            self._dequeue_and_enqueue()
+            # self._dequeue_and_enqueue()
             # sharpen self.gt again, as we have changed the self.gt with self._dequeue_and_enqueue
-            self.gt_usm = self.usm_sharpener(self.gt)
+            # self.gt_usm = self.usm_sharpener(self.gt)
             self.lq = self.lq.contiguous()  # for the warning: grad and param do not obey the gradient layout contract
+
+            self.text = data['text']
         
         else: # for paired training or validation
             self.lq = data['lq'].to(self.device)
