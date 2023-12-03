@@ -6,7 +6,7 @@ import os
 def main(args):
     txt_file = open(args.meta_info, 'w')
     # sca images
-    img_paths_gt = sorted(glob.glob(os.path.join(args.input[0], '*')))
+    img_paths_gt = sorted(glob.glob(os.path.join(args.input, '*')))
 
     for img_path_gt in img_paths_gt:
         # get the relative paths
