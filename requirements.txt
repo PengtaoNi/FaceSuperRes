@@ -1,5 +1,6 @@
 argparse
 basicsr>=1.4.2
+black
 numpy
 opencv-python
 Pillow
