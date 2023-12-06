@@ -33,53 +33,57 @@ class ImagePairedTextDataset(data.Dataset):
         super(ImagePairedTextDataset, self).__init__()
         self.opt = opt
         self.file_client = None
-        self.io_backend_opt = opt['io_backend']
+        self.io_backend_opt = opt["io_backend"]
         # mean and std for normalizing the input images
-        self.mean = opt['mean'] if 'mean' in opt else None
-        self.std = opt['std'] if 'std' in opt else None
+        self.mean = opt["mean"] if "mean" in opt else None
+        self.std = opt["std"] if "std" in opt else None
 
-        self.gt_folder = opt['dataroot_gt']
-        self.lq_folder = opt['dataroot_lq']
-        self.text_file = opt['dataroot_text']
-        self.filename_tmpl = opt['filename_tmpl'] if 'filename_tmpl' in opt else '{}'
+        self.gt_folder = opt["dataroot_gt"]
+        self.lq_folder = opt["dataroot_lq"]
+        self.text_file = opt["dataroot_text"]
+        self.filename_tmpl = opt["filename_tmpl"] if "filename_tmpl" in opt else "{}"
 
         # disk backend with meta_info
         # Each line in the meta_info describes the relative path to an image
-        with open(self.opt['meta_info']) as fin:
+        with open(self.opt["meta_info"]) as fin:
             paths = [line.strip() for line in fin]
         self.paths = []
         for path in paths:
-            gt_path, lq_path = path.split(', ')
+            gt_path, lq_path = path.split(", ")
             gt_path = os.path.join(self.gt_folder, gt_path)
             lq_path = os.path.join(self.lq_folder, lq_path)
-            self.paths.append(dict([('gt_path', gt_path), ('lq_path', lq_path)]))
-        
+            self.paths.append(dict([("gt_path", gt_path), ("lq_path", lq_path)]))
+
         with open(self.text_file) as texts:
             self.text = [line.strip() for line in texts]
 
     def __getitem__(self, index):
         if self.file_client is None:
-            self.file_client = FileClient(self.io_backend_opt.pop('type'), **self.io_backend_opt)
+            self.file_client = FileClient(
+                self.io_backend_opt.pop("type"), **self.io_backend_opt
+            )
 
-        scale = self.opt['scale']
+        scale = self.opt["scale"]
 
         # Load gt and lq images. Dimension order: HWC; channel order: BGR;
         # image range: [0, 1], float32.
-        gt_path = self.paths[index]['gt_path']
-        img_bytes = self.file_client.get(gt_path, 'gt')
+        gt_path = self.paths[index]["gt_path"]
+        img_bytes = self.file_client.get(gt_path, "gt")
         img_gt = imfrombytes(img_bytes, float32=True)
-        lq_path = self.paths[index]['lq_path']
-        img_bytes = self.file_client.get(lq_path, 'lq')
+        lq_path = self.paths[index]["lq_path"]
+        img_bytes = self.file_client.get(lq_path, "lq")
         img_lq = imfrombytes(img_bytes, float32=True)
         text = self.text[index]
 
         # augmentation for training
-        if self.opt['phase'] == 'train':
-            gt_size = self.opt['gt_size']
+        if self.opt["phase"] == "train":
+            gt_size = self.opt["gt_size"]
             # random crop
             img_gt, img_lq = paired_random_crop(img_gt, img_lq, gt_size, scale, gt_path)
             # flip, rotation
-            img_gt, img_lq = augment([img_gt, img_lq], self.opt['use_hflip'], self.opt['use_rot'])
+            img_gt, img_lq = augment(
+                [img_gt, img_lq], self.opt["use_hflip"], self.opt["use_rot"]
+            )
 
         # BGR to RGB, HWC to CHW, numpy to tensor
         img_gt, img_lq = img2tensor([img_gt, img_lq], bgr2rgb=True, float32=True)
@@ -88,7 +92,13 @@ class ImagePairedTextDataset(data.Dataset):
             normalize(img_lq, self.mean, self.std, inplace=True)
             normalize(img_gt, self.mean, self.std, inplace=True)
 
-        return {'lq': img_lq, 'gt': img_gt, 'lq_path': lq_path, 'gt_path': gt_path, 'text': text}
+        return {
+            "lq": img_lq,
+            "gt": img_gt,
+            "lq_path": lq_path,
+            "gt_path": gt_path,
+            "text": text,
+        }
 
     def __len__(self):
         return len(self.paths)

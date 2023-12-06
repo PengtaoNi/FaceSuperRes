@@ -4,9 +4,9 @@ import os
 
 
 def main(args):
-    with open(args.annotation, 'r') as f:
+    with open(args.annotation, "r") as f:
         lines = f.readlines()
-        attributes = lines[1].strip().split(' ')
+        attributes = lines[1].strip().split(" ")
         """
         0: 5_o_Clock_Shadow
         1: Arched_Eyebrows
@@ -49,52 +49,85 @@ def main(args):
         38: Wearing_Necktie
         39: Young
         """
-    
+
     for i in range(len(attributes)):
-        attributes[i] = attributes[i].replace('_', ' ')
+        attributes[i] = attributes[i].replace("_", " ")
 
     texts = []
     for line in lines[2:]:
         vals = line.strip().split()[1:]
-        text = ''
+        text = ""
 
         adjectives = [39, 13, 31, 4]
         for i in adjectives:
-            if vals[i] == '1':
-                text += attributes[i] + ' '
-        
-        if vals[20] == '1': # Male
-            text += 'Man with '
+            if vals[i] == "1":
+                text += attributes[i] + " "
+
+        if vals[20] == "1":  # Male
+            text += "Man with "
         else:
-            text += 'Woman with '
-        
-        others = [0, 1, 3, 5, 6, 7, 8, 9, 11, 12, 14, 15, 16, 17, 18, 19, 21, 22, 23, 24, \
-                  25, 26, 27, 28, 29, 30, 32, 33, 34, 35, 36, 37, 38]
+            text += "Woman with "
+
+        others = [
+            0,
+            1,
+            3,
+            5,
+            6,
+            7,
+            8,
+            9,
+            11,
+            12,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+        ]
         for i in others:
-            if vals[i] == '1':
-                text += attributes[i] + ', '
+            if vals[i] == "1":
+                text += attributes[i] + ", "
 
         texts.append(text[:-2])
-    
-    with open(args.text, 'w') as f:
-        for text in texts:
-            f.write(text + '\n')
 
-if __name__ == '__main__':
-    """This script is used to generate meta info (txt file) for paired images.
-    """
+    with open(args.text, "w") as f:
+        for text in texts:
+            f.write(text + "\n")
+
+
+if __name__ == "__main__":
+    """This script is used to generate meta info (txt file) for paired images."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--annotation',
+        "--annotation",
         type=str,
-        default='dataset/celeba/annotation.txt',
-        help='txt path for annotations'
+        default="dataset/celeba/annotation.txt",
+        help="txt path for annotations",
     )
     parser.add_argument(
-        '--text',
+        "--text",
         type=str,
-        default='dataset/celeba/celeba_aligned_text.txt',
-        help='txt path for generated text'
+        default="dataset/celeba/celeba_aligned_text.txt",
+        help="txt path for generated text",
     )
     args = parser.parse_args()
 
