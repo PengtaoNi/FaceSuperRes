@@ -1,12 +1,12 @@
 # https://github.com/XPixelGroup/BasicSR/tree/master
 
 import argparse
-import cv2
 import glob
-import numpy as np
 import os
-import torch
 
+import cv2
+import numpy as np
+import torch
 from basicsr.archs.rrdbnet_arch import RRDBNet
 
 
