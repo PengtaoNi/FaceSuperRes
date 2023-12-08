@@ -3,56 +3,79 @@
 import argparse
 import glob
 import os
+import sys
+import warnings
 
 import cv2
 import numpy as np
 import torch
 from basicsr.archs.rrdbnet_arch import RRDBNet
 
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_DIR = os.path.dirname(ROOT_DIR)
+sys.path.append(REPO_DIR)
+
+from realesrgan import RealESRGANer
+
+warnings.filterwarnings("ignore")
+
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--model_path",
+        "-n",
+        "--model_name",
         type=str,
-        default="net_nopair_og.pth",  # noqa: E251  # noqa: E501
+        default="RealESRGAN_x4plus",
     )
     parser.add_argument(
-        "--input", type=str, default="test_img", help="input test image folder"
+        "-i", "--input", type=str, default="test_img", help="input test image folder"
     )
-    parser.add_argument("--output", type=str, default="results", help="output folder")
+    parser.add_argument(
+        "-o", "--output", type=str, default="results", help="output folder"
+    )
+
     args = parser.parse_args()
+
+    model_path = os.path.join("weights", args.model_name + ".pth")
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # set up model
     model = RRDBNet(
-        num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32
+        num_in_ch=3,
+        num_out_ch=3,
+        num_feat=64,
+        num_block=23,
+        num_grow_ch=32,
+        scale=4,
     )
-    model.load_state_dict(torch.load(args.model_path)["params"], strict=True)
-    model.eval()
-    model = model.to(device)
+
+    # params in upsampling
+    scale = 4
+    # restorer
+    upsampler = RealESRGANer(
+        scale=scale,
+        model_path=model_path,
+        model=model,
+    )
 
     os.makedirs(args.output, exist_ok=True)
     for idx, path in enumerate(sorted(glob.glob(os.path.join(args.input, "*")))):
-        imgname = os.path.splitext(os.path.basename(path))[0]
-        print("Testing", idx, imgname)
+        img_name = os.path.splitext(os.path.basename(path))[0]
+        print("Testing", idx, img_name)
         # read image
-        img = cv2.imread(path, cv2.IMREAD_COLOR).astype(np.float32) / 255.0
-        img = torch.from_numpy(np.transpose(img[:, :, [2, 1, 0]], (2, 0, 1))).float()
-        img = img.unsqueeze(0).to(device)
+        img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
         # inference
         try:
-            with torch.no_grad():
-                output = model(img)
+            output, _ = upsampler.enhance(img, outscale=scale)
         except Exception as error:
-            print("Error", error, imgname)
+            print("Error", error, img_name)
         else:
             # save image
-            output = output.data.squeeze().float().cpu().clamp_(0, 1).numpy()
-            output = np.transpose(output[[2, 1, 0], :, :], (1, 2, 0))
-            output = (output * 255.0).round().astype(np.uint8)
-            cv2.imwrite(os.path.join(args.output, f"{imgname}_ESRGAN.png"), output)
+            cv2.imwrite(os.path.join(args.output, f"{img_name}_ESRGAN.png"), output)
 
 
 if __name__ == "__main__":
+    # because you call it from repo root
+    os.chdir(ROOT_DIR)
     main()
